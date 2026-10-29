@@ -2,102 +2,58 @@ import { useEffect, useState } from 'react';
 import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring, useTransform } from 'motion/react';
 import { EASE } from '../lib/motion.jsx';
 
-/* ReBuild '26 — real event timeline (IST) */
-const T = {
-  r1Start: Date.parse('2026-11-06T10:00:00+05:30'),
-  r1End: Date.parse('2026-11-06T17:01:00+05:30'),
-  finalStart: Date.parse('2026-11-07T10:00:00+05:30'),
-  finalEnd: Date.parse('2026-11-08T22:00:00+05:30')
-};
-
-function phaseAt(now) {
-  if (now < T.r1Start) return { pill: 'OPENS SOON', tone: 'soon', title: 'Round 1 · Dashboard Recreation', label: 'ROUND 1 OPENS IN', target: T.r1Start };
-  if (now < T.r1End) return { pill: 'LIVE', tone: 'live', title: 'Round 1 · Dashboard Recreation', label: 'SUBMISSIONS CLOSE IN', target: T.r1End };
-  if (now < T.finalStart) return { pill: 'SHORTLIST', tone: 'soon', title: 'Final Round · Present your build', label: 'FINAL ROUND STARTS IN', target: T.finalStart };
-  if (now < T.finalEnd) return { pill: 'LIVE', tone: 'live', title: 'Final Round · Present your build', label: 'FINAL ROUND ENDS IN', target: T.finalEnd };
-  return { pill: 'DONE', tone: 'soon', title: 'ReBuild ’26 · Results', label: 'RESULTS ANNOUNCED IN', target: null };
-}
-
-function useNow(interval = 1000) {
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), interval);
-    return () => clearInterval(id);
-  }, [interval]);
-  return now;
-}
-
-const pad = n => String(Math.max(0, n)).padStart(2, '0');
-
-function istParts(now) {
-  const f = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Kolkata' }).format(new Date(now));
-  const h = parseInt(f.slice(0, 2), 10);
-  const greet = h < 12 ? 'GOOD MORNING' : h < 17 ? 'GOOD AFTERNOON' : 'GOOD EVENING';
-  return { time: f, greet };
-}
-
-/* The story the inbox tells, in order — newest slides in on top */
-const STORY = [
-  { from: 'CampusCode', kind: 'brand', text: 'Round 1 is live. Recreate the dashboard your way — submit by 5:01 PM.', time: '10:00' },
-  { from: 'Riya', kind: 'R', color: '#ff5b1f', text: 'Hero animation pushed 🔥 check the preview link', time: '13:42' },
-  { from: 'CampusCode', kind: 'brand', text: 'Submission received ✓ Live link, screenshots & repo verified.', time: '16:58' },
-  { from: 'Karthik · Mentor', kind: 'K', color: '#8b7cff', text: 'Love the motion work. Tighten the mobile nav before finals.', time: '18:20' },
-  { from: 'CampusCode', kind: 'brand', text: 'You’re shortlisted 🎉 Final round — 7 Nov, 10:00 AM.', time: '21:05' },
-  { from: 'CampusCode', kind: 'brand', text: 'Certificate issued · ReBuild ’26 Finalist. Share it.', time: 'now' }
+const FEED = [
+  { tone: 'lime', icon: '✓', title: 'Checkpoint 2 cleared', body: 'Your prototype passed the mid-review.', time: 'now' },
+  { tone: 'purple', icon: '＋', title: 'Riya joined your team', body: 'Neural Ninjas is now 4 / 4.', time: '1m' },
+  { tone: 'ink', icon: '◆', title: 'IdeaCheck: 92% original', body: '“Campus lost & found with on-device AI”', time: '4m' },
+  { tone: 'blue', icon: '✦', title: 'New arena: Future Web', body: 'Registrations open · 48h build.', time: '9m' },
+  { tone: 'lime', icon: '★', title: 'Mentor replied', body: '“Ship the demo first, polish later.”', time: '12m' },
+  { tone: 'purple', icon: '⬢', title: 'Certificate issued', body: 'ReBuild ’26 · Participant', time: '20m' }
 ];
 
-export function MiniMark({ size = 22 }) {
-  return (
-    <span className="mini-mark" style={{ width: size, height: size }} aria-hidden="true">
-      <i />
-      <i />
-      <i />
-    </span>
-  );
+function useCountdown(seconds) {
+  const [left, setLeft] = useState(seconds);
+  useEffect(() => {
+    const id = setInterval(() => setLeft(s => (s > 0 ? s - 1 : seconds)), 1000);
+    return () => clearInterval(id);
+  }, [seconds]);
+  const h = String(Math.floor(left / 3600)).padStart(2, '0');
+  const m = String(Math.floor((left % 3600) / 60)).padStart(2, '0');
+  const s = String(left % 60).padStart(2, '0');
+  return [h, m, s];
 }
 
-function Avatar({ m }) {
-  if (m.kind === 'brand') return <MiniMark size={30} />;
-  return (
-    <span className="msg__av" style={{ background: m.color }}>
-      {m.kind}
-    </span>
-  );
-}
-
-function Inbox() {
-  const reduce = useReducedMotion();
+function Feed() {
   const [head, setHead] = useState(2);
+  const reduce = useReducedMotion();
   useEffect(() => {
     if (reduce) return;
-    const id = setInterval(() => setHead(h => (h + 1) % STORY.length), 3200);
+    const id = setInterval(() => setHead(h => (h + 1) % FEED.length), 2600);
     return () => clearInterval(id);
   }, [reduce]);
   const items = [0, 1, 2].map(i => {
-    const k = (head - i + STORY.length * 4) % STORY.length;
-    return { ...STORY[k], key: k };
+    const k = (head - i + FEED.length * 4) % FEED.length;
+    return { ...FEED[k], key: k };
   });
   return (
-    <ul className="inbox" aria-label="CampusCode inbox">
+    <ul className="app-feed" aria-label="Live activity">
       <AnimatePresence initial={false}>
-        {items.map((m, i) => (
+        {items.map((it, i) => (
           <motion.li
-            key={m.key}
+            key={it.key}
             layout
-            className={`msg ${m.kind === 'brand' ? 'msg--brand' : ''}`}
-            initial={{ opacity: 0, y: -20, scale: 0.94 }}
-            animate={{ opacity: i === 2 ? 0.5 : 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 14, transition: { duration: 0.35 } }}
-            transition={{ duration: 0.75, ease: EASE }}
+            className="app-feed__item"
+            initial={{ opacity: 0, y: -18, scale: 0.92 }}
+            animate={{ opacity: i === 2 ? 0.55 : 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 12, transition: { duration: 0.35 } }}
+            transition={{ duration: 0.7, ease: EASE }}
           >
-            <Avatar m={m} />
-            <span className="msg__body">
-              <span className="msg__top">
-                <strong>{m.from}</strong>
-                <time className="mono">{m.time}</time>
-              </span>
-              <span className="msg__text">{m.text}</span>
+            <span className={`app-feed__icon tone-${it.tone}`}>{it.icon}</span>
+            <span className="app-feed__text">
+              <strong>{it.title}</strong>
+              <small>{it.body}</small>
             </span>
+            <time>{it.time}</time>
           </motion.li>
         ))}
       </AnimatePresence>
@@ -105,60 +61,12 @@ function Inbox() {
   );
 }
 
-function LiveCard({ now }) {
-  const p = phaseAt(now);
-  const left = p.target ? Math.max(0, Math.floor((p.target - now) / 1000)) : 0;
-  const d = Math.floor(left / 86400);
-  const h = Math.floor((left % 86400) / 3600);
-  const m = Math.floor((left % 3600) / 60);
-  const s = left % 60;
-  const checks = ['Live link', 'Screenshots', 'GitHub repo'];
-  return (
-    <div className="app-live">
-      <div className="app-live__row">
-        <span className={`pill pill--${p.tone}`}>
-          <i /> {p.pill}
-        </span>
-        <span className="mono app-live__cat">REBUILD ’26</span>
-      </div>
-      <p className="app-live__title">{p.title}</p>
-      <p className="app-live__label mono">{p.label}</p>
-      {p.target ? (
-        <div className="app-live__clock tabular">
-          {[
-            [d, 'D'],
-            [h, 'H'],
-            [m, 'M'],
-            [s, 'S']
-          ].map(([v, u], i) => (
-            <span key={u} className={i === 3 ? 'is-sec' : ''}>
-              {pad(v)}
-              <small className="mono">{u}</small>
-            </span>
-          ))}
-        </div>
-      ) : (
-        <div className="app-live__clock">Stay tuned</div>
-      )}
-      <ul className="app-checks mono" aria-label="Submission checklist">
-        {checks.map((c, i) => (
-          <motion.li key={c} initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, ease: EASE, delay: 2 + i * 0.25 }}>
-            <i>✓</i>
-            {c}
-          </motion.li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
 function AppScreen() {
-  const now = useNow();
-  const { time, greet } = istParts(now);
+  const [h, m, s] = useCountdown(23 * 3600 + 41 * 60 + 7);
   return (
     <div className="app">
       <div className="app-status">
-        <span className="tabular">{time}</span>
+        <span>9:41</span>
         <span className="app-status__icons" aria-hidden="true">
           <i className="sig" />
           <i className="wifi" />
@@ -168,29 +76,50 @@ function AppScreen() {
 
       <div className="app-head">
         <div>
-          <small className="mono">{greet}</small>
+          <small className="mono">GOOD EVENING</small>
           <strong>Hey, Aarav</strong>
         </div>
         <span className="app-avatar">A</span>
       </div>
 
-      <LiveCard now={now} />
+      <div className="app-live">
+        <div className="app-live__row">
+          <span className="pill pill--live">
+            <i /> LIVE
+          </span>
+          <span className="mono app-live__cat">AI INNOVATION</span>
+        </div>
+        <p className="app-live__label mono">SUBMISSION CLOSES IN</p>
+        <div className="app-live__clock tabular">
+          <span>{h}</span>:<span>{m}</span>:<span>{s}</span>
+        </div>
+        <div className="app-live__progress">
+          <motion.span initial={{ scaleX: 0 }} animate={{ scaleX: 0.68 }} transition={{ duration: 2, ease: EASE, delay: 1.6 }} />
+        </div>
+        <div className="app-live__foot">
+          <span className="app-team" aria-hidden="true">
+            <i style={{ background: '#b6f23a' }}>A</i>
+            <i style={{ background: '#ff5b1f' }}>R</i>
+            <i style={{ background: '#8b7cff' }}>K</i>
+            <i style={{ background: '#eeebe5', color: '#111' }}>M</i>
+          </span>
+          <span className="mono">NEURAL NINJAS · 3/4 STEPS</span>
+        </div>
+      </div>
 
       <div className="app-tabs" role="presentation">
-        <span className="is-active">
-          Inbox <b>3</b>
-        </span>
+        <span className="is-active">Activity</span>
         <span>Arenas</span>
         <span>Team</span>
       </div>
 
-      <Inbox />
+      <Feed />
 
       <div className="app-dock" aria-hidden="true">
         <span className="is-active">⌂</span>
         <span>◎</span>
         <span className="app-dock__plus">＋</span>
-        <span>✉</span>
+        <span>☰</span>
         <span>◐</span>
       </div>
     </div>
@@ -215,7 +144,7 @@ export default function Phone({ ready = true }) {
     return () => window.removeEventListener('pointermove', on);
   }, [reduce, mx, my]);
 
-  const note = (delay, cls, children, float = 8) => (
+  const chip = (delay, cls, children, float = 8) => (
     <motion.div
       className={`float-chip ${cls}`}
       initial={reduce ? false : { opacity: 0, y: 24, scale: 0.94 }}
@@ -257,41 +186,32 @@ export default function Phone({ ready = true }) {
         </motion.div>
       </motion.div>
 
-      {note(1.5, 'chip-a note', (
+      {chip(1.5, 'chip-a', (
         <>
-          <MiniMark size={34} />
-          <span className="note__body">
-            <span className="note__top mono">
-              CAMPUSCODE <em>· now</em>
-            </span>
-            <strong>Submission received ✓</strong>
-            <small>Live link, screenshots & GitHub repo verified.</small>
+          <span className="chip-icon tone-lime">✓</span>
+          <span>
+            <strong>Submitted</strong>
+            <small className="mono">BUILD · 02:14 AM</small>
           </span>
         </>
       ))}
-      {note(2.2, 'chip-b bubble', (
+      {chip(1.7, 'chip-b', (
         <>
-          <span className="msg__av" style={{ background: '#ff5b1f' }}>
-            R
-          </span>
-          <span className="note__body">
-            <span className="note__top mono">
-              RIYA <em>· team</em>
-            </span>
-            <span className="bubble__text">deployed to vercel ✅ link’s in the group</span>
+          <span className="chip-rank tabular">#3</span>
+          <span>
+            <strong>Leaderboard</strong>
+            <small className="mono">↑ 4 SPOTS TODAY</small>
           </span>
         </>
       ), 10)}
-      {note(2.9, 'chip-c note', (
+      {chip(1.9, 'chip-c', (
         <>
-          <span className="date-tile" aria-hidden="true">
-            <small className="mono">NOV</small>
-            <b>07</b>
+          <span className="chip-bars" aria-hidden="true">
+            <i /><i /><i /><i /><i />
           </span>
-          <span className="note__body">
-            <span className="note__top mono">FINAL ROUND · 10:00 AM</span>
-            <strong>You’re shortlisted 🎉</strong>
-            <small>Present your build to the judges.</small>
+          <span>
+            <strong>IdeaCheck</strong>
+            <small className="mono">92% ORIGINAL</small>
           </span>
         </>
       ), 6)}

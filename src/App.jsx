@@ -7,7 +7,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 import ClickSpark from './components/rb/ClickSpark.jsx';
 import GradualBlur from './components/rb/GradualBlur.jsx';
-import TargetCursor from './components/rb/TargetCursor.jsx';
 import { prefersReduced } from './lib/motion.jsx';
 
 import Loader from './sections/Loader.jsx';
@@ -65,7 +64,6 @@ export default function App() {
         {!loaderGone && <Loader onReveal={() => setReady(true)} onDone={() => setLoaderGone(true)} />}
         <ScrollProgress />
         <div className="grain" aria-hidden="true" />
-        <TargetCursor targetSelector="a, button, .cursor-target" cursorColor="#eeebe5" cursorColorOnTarget="#ff5b1f" size={34} cornerSize={10} thickness={2} padding={8} dotSize={4} blendMode="normal" showLabel spinDuration={3} />
         <Nav ready={ready} />
         <main>
           <Hero ready={ready} />

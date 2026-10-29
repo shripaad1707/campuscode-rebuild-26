@@ -98,7 +98,7 @@ export default function Hero({ ready }) {
             amount={0}
             lines={[
               <VariableProximity label="BUILD" {...vp} toColor="#ff5b1f" />,
-              <VariableProximity label="COMPETE" {...vp} fromColor="#ff5b1f" toColor="#ffb08a" className="hero__compete" />,
+              <VariableProximity label="COMPETE" {...vp} className="hero__outline" />,
               <>
                 <VariableProximity label="SHIP" {...vp} toColor="#ff5b1f" />
                 <span className="hero__dot">.</span>
