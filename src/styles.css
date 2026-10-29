@@ -64,8 +64,18 @@ body {
 }
 
 ::selection {
-  background: var(--orange);
-  color: #070708;
+  background: rgba(238, 235, 229, 0.18);
+  color: inherit;
+}
+
+.nav,
+.btn,
+.link-btn,
+.stage,
+button {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 a {
