@@ -54,8 +54,8 @@ export default function Hero({ ready }) {
           {!LITE && (
             <LiquidEther
               colors={['#ff5b1f', '#8b7cff', '#2a1a6e']}
-              mouseForce={22}
-              cursorSize={110}
+              mouseForce={14}
+              cursorSize={55}
               resolution={0.45}
               autoDemo
               autoSpeed={0.45}
