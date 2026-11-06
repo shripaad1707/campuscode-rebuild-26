@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
+import Lenis from 'lenis';
+import 'lenis/dist/lenis.css';
+import ClickSpark from './components/rb/ClickSpark.jsx';
 import Landing from './pages/Landing.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
@@ -39,10 +42,28 @@ export default function App() {
   useEffect(() => {
     const onHash = () => {
       setPath(getPath());
-      window.scrollTo(0, 0);
+      window.__lenis ? window.__lenis.scrollTo(0, { immediate: true }) : window.scrollTo(0, 0);
     };
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
+  }, []);
+
+  // Lenis smooth scrolling for the whole site (skipped for reduced-motion users)
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const lenis = new Lenis({ duration: 1.15, easing: t => 1 - Math.pow(1 - t, 3.2), anchors: true });
+    window.__lenis = lenis;
+    let id;
+    const raf = t => {
+      lenis.raf(t);
+      id = requestAnimationFrame(raf);
+    };
+    id = requestAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(id);
+      lenis.destroy();
+      window.__lenis = undefined;
+    };
   }, []);
 
   useEffect(() => save('cc-user', user), [user]);
@@ -73,6 +94,7 @@ export default function App() {
   else page = <Landing user={user} />;
 
   return (
+    <ClickSpark sparkColor={['#7665ff', '#a8e62e', '#111111']} sparkSize={10} sparkRadius={22} sparkCount={9} duration={520} style={{ height: 'auto' }}>
     <AnimatePresence mode="wait">
       <motion.div
         key={section}
@@ -84,5 +106,6 @@ export default function App() {
         {page}
       </motion.div>
     </AnimatePresence>
+    </ClickSpark>
   );
 }

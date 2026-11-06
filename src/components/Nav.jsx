@@ -1,4 +1,5 @@
 import Logo from './Logo.jsx';
+import Magnet from './rb/Magnet.jsx';
 
 export default function Nav({ user }) {
   return (
@@ -16,7 +17,9 @@ export default function Nav({ user }) {
           ) : (
             <>
               <a className="btn btn--ghost" href="#/login">Login</a>
-              <a className="btn btn--dark" href="#/register">Join CampusCode ↗</a>
+              <Magnet padding={40} magnetStrength={4}>
+                <a className="btn btn--dark" href="#/register">Join CampusCode ↗</a>
+              </Magnet>
             </>
           )}
         </div>
@@ -30,5 +33,6 @@ function scrollTo(e, id) {
   const el = document.getElementById(id);
   if (!el) return;
   e.preventDefault();
-  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (window.__lenis) window.__lenis.scrollTo(el, { offset: -80 });
+  else el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }

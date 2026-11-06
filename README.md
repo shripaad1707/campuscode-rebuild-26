@@ -14,7 +14,7 @@ A redesign of CampusCode's four pages — Landing, Login, Register and Student D
   - *Events*: search, track filters, sort, event details modal and one-click register (adds to My Events).
 
 ## Tech
-React 19 + Vite, Motion (`motion/react`), React Bits (CountUp, SpotlightCard), plain CSS. Mock data in `src/data/events.js`. State saved in `localStorage`. Hash routing (`#/login`, `#/register`, `#/dashboard/events`).
+React 19 + Vite, Motion (`motion/react`), Lenis smooth scroll, React Bits (CountUp, SpotlightCard, ScrollVelocity, Magnet, ClickSpark), plain CSS. Mock data in `src/data/events.js`. State saved in `localStorage`. Hash routing (`#/login`, `#/register`, `#/dashboard/events`).
 
 ## Run
 ```bash

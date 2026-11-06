@@ -1,7 +1,7 @@
 // Mock data — frontend only, no backend.
 // Every event is a "pass". `joined` events show up in My Events.
 
-export const TEAM_NAME = 'YOUR-TEAM-NAME'; // ← your tracking team name
+export const TEAM_NAME = 'Team Inevitable'; // tracking team name
 
 export const demoUser = {
   name: 'Shripaad Koduri',

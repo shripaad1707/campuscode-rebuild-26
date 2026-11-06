@@ -7,6 +7,8 @@ import Barcode from '../components/Barcode.jsx';
 import FlapText from '../components/FlapText.jsx';
 import Reveal from '../components/Reveal.jsx';
 import CountUp from '../components/rb/CountUp.jsx';
+import ScrollVelocity from '../components/rb/ScrollVelocity.jsx';
+import Magnet from '../components/rb/Magnet.jsx';
 import { events, fmtDate } from '../data/events.js';
 import { go } from '../App.jsx';
 
@@ -17,6 +19,7 @@ export default function Landing({ user }) {
     <div className="page page--grid">
       <Nav user={user} />
       <Hero />
+      <Marquee />
       <Departures />
       <Route />
       <Stamps />
@@ -79,7 +82,9 @@ function Hero() {
                 <p className="hero__class purple">CC-26</p>
               </div>
               <Barcode value="ADMIT-ONE-BUILDER" height={56} />
-              <a className="btn btn--lime btn--block" href="#/register">Board now ↗</a>
+              <Magnet padding={50} magnetStrength={5}>
+                <a className="btn btn--lime btn--block" href="#/register">Board now ↗</a>
+              </Magnet>
             </div>
           }
         >
@@ -131,6 +136,32 @@ function Hero() {
         <span>Build · Compete · Ship</span>
       </div>
     </section>
+  );
+}
+
+/* ---------------- Crossing marquee bands (React Bits ScrollVelocity) ---------------- */
+const WORDS = ['IDEAS', 'PEOPLE', 'PRODUCTS', 'INNOVATION', 'COMMUNITY'];
+const Row = () => (
+  <span className="marquee__row">
+    {WORDS.map(w => (
+      <span key={w} className="marquee__word">
+        {w}
+        <span className="marquee__star">✦</span>
+      </span>
+    ))}
+  </span>
+);
+
+function Marquee() {
+  return (
+    <div className="marquee" aria-label="Ideas, people, products, innovation, community">
+      <div className="marquee__band marquee__band--b" aria-hidden="true">
+        <ScrollVelocity texts={[<Row key="b" />]} velocity={-30} numCopies={4} parallaxClassName="marquee__parallax" scrollerClassName="marquee__scroller" />
+      </div>
+      <div className="marquee__band marquee__band--a">
+        <ScrollVelocity texts={[<Row key="a" />]} velocity={36} numCopies={4} skewWithVelocity={5} parallaxClassName="marquee__parallax" scrollerClassName="marquee__scroller" />
+      </div>
+    </div>
   );
 }
 
