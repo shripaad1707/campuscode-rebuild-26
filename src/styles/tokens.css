@@ -1,0 +1,64 @@
+/* CampusCode brand tokens — exact values from the ReBuild '26 rules (Section 03 + 12) */
+:root {
+  --bg: #f7f7f4;        /* page background */
+  --card: #ffffff;      /* cards */
+  --border: #deded8;    /* thin borders */
+  --ink: #111111;       /* base text */
+  --muted: #6f6f6a;     /* secondary text */
+  --faint: #a3a39c;
+  --purple: #7665ff;    /* primary */
+  --purple-soft: #eeecff;
+  --lime: #a8e62e;      /* accent */
+  --lime-dark: #82b91a; /* accent that stays readable on white */
+  --lime-soft: #f1fadf;
+
+  --font-head: 'Inter Variable', Inter, system-ui, sans-serif; /* headings, bold */
+  --font-mono: 'DM Mono', ui-monospace, monospace;             /* small labels */
+
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --wrap: 1280px;
+  --shadow: 0 30px 80px rgba(17, 17, 17, 0.07);
+}
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { background: var(--bg); scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-head);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, p, dl, dd { margin: 0; }
+h1, h2, h3 { font-weight: 900; letter-spacing: -0.045em; line-height: 0.92; }
+a { color: inherit; text-decoration: none; }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; background: none; border: 0; padding: 0; }
+img { display: block; }
+::selection { background: var(--purple-soft); }
+:focus-visible { outline: 2px solid var(--purple); outline-offset: 3px; }
+
+/* small mono label, e.g. "CAMPUSCODE / 001" */
+.label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 400;
+}
+.mono { font-family: var(--font-mono); letter-spacing: 0.06em; }
+.muted { color: var(--muted); }
+.purple { color: var(--purple); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  html { scroll-behavior: auto; }
+}
