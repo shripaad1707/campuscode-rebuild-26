@@ -89,6 +89,7 @@ export default function App() {
         joined={joined}
         onJoin={join}
         onLogout={signOut}
+        onUpdateUser={u => setUser(u)}
       />
     );
   else page = <Landing user={user} />;

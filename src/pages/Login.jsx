@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { motion } from 'motion/react';
+import { useEffect, useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 import Logo from '../components/Logo.jsx';
 import Ticket from '../components/Ticket.jsx';
 import Barcode from '../components/Barcode.jsx';
@@ -20,6 +20,7 @@ export default function Login({ onLogin }) {
   const [form, setForm] = useState({ email: '', password: '', captcha: '' });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [forgot, setForgot] = useState(false);
   const captcha = useCaptcha();
 
   const set = key => e => {
@@ -101,7 +102,7 @@ export default function Login({ onLogin }) {
               </div>
 
               <Field label="Email address" type="email" placeholder="you@college.edu" value={form.email} onChange={set('email')} error={errors.email} autoComplete="email" />
-              <Field label="Password" type="password" placeholder="Your password" value={form.password} onChange={set('password')} error={errors.password} autoComplete="current-password" hint={<a href="#/login" onClick={e => e.preventDefault()}>Forgot?</a>} />
+              <Field label="Password" type="password" placeholder="Your password" value={form.password} onChange={set('password')} error={errors.password} autoComplete="current-password" hint={<a href="#/login" onClick={e => { e.preventDefault(); setForgot(true); }}>Forgot?</a>} />
               <Field
                 label={`Quick check · what is ${captcha.question}?`}
                 inputMode="numeric"
@@ -127,6 +128,7 @@ export default function Login({ onLogin }) {
           </Ticket>
         </motion.section>
       </main>
+      <ForgotModal open={forgot} onClose={() => setForgot(false)} initial={form.email} />
     </div>
   );
 }
@@ -161,5 +163,59 @@ function Waiting() {
         </div>
       </div>
     </div>
+  );
+}
+
+function ForgotModal({ open, onClose, initial }) {
+  const [email, setEmail] = useState('');
+  const [state, setState] = useState('idle'); // idle | sending | sent
+  const [err, setErr] = useState('');
+  useEffect(() => { if (open) { setEmail(initial || ''); setState('idle'); setErr(''); } }, [open, initial]);
+  useEffect(() => {
+    const k = e => e.key === 'Escape' && onClose();
+    if (open) window.addEventListener('keydown', k);
+    return () => window.removeEventListener('keydown', k);
+  }, [open, onClose]);
+  const send = e => {
+    e.preventDefault();
+    if (!/^\S+@\S+\.\S+$/.test(email.trim())) return setErr('Enter the email you registered with');
+    setState('sending');
+    setTimeout(() => setState('sent'), 1000);
+  };
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div className="cmdk" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={onClose}>
+          <motion.div className="forgot" role="dialog" aria-label="Reset password" onMouseDown={e => e.stopPropagation()}
+            initial={{ opacity: 0, y: -14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+            <div className="forgot__head">
+              <p className="label">Lost boarding pass</p>
+              <button className="icon-btn" onClick={onClose} aria-label="Close">✕</button>
+            </div>
+            <AnimatePresence mode="wait">
+              {state !== 'sent' ? (
+                <motion.form key="f" onSubmit={send} className="forgot__body" exit={{ opacity: 0, x: -10 }}>
+                  <h2>RESET PASSWORD.</h2>
+                  <p className="muted">We will email you a secure link to set a new password. It expires in 30 minutes.</p>
+                  <label className="dfield">
+                    <span className="label">Email</span>
+                    <input autoFocus value={email} onChange={e => { setEmail(e.target.value); setErr(''); }} placeholder="you@college.edu" className={err ? 'is-err' : ''} />
+                    {err && <small>{err}</small>}
+                  </label>
+                  <button className="btn btn--dark btn--block" disabled={state === 'sending'}>{state === 'sending' ? 'Sending link…' : 'Send reset link ↗'}</button>
+                </motion.form>
+              ) : (
+                <motion.div key="s" className="forgot__body" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}>
+                  <motion.div className="forgot__ok" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 400, damping: 14 }}>✓</motion.div>
+                  <h2>CHECK YOUR INBOX.</h2>
+                  <p className="muted">If an account exists for <strong>{email}</strong>, a reset link is on its way.</p>
+                  <button className="btn btn--block" onClick={onClose}>Back to check-in</button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

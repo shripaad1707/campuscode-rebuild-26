@@ -11,6 +11,9 @@ import TiltedCard from '../components/rb/TiltedCard.jsx';
 import Folder from '../components/rb/Folder.jsx';
 import AnimatedList from '../components/rb/AnimatedList.jsx';
 import ShinyText from '../components/rb/ShinyText.jsx';
+import CommandPalette from '../components/dash/CommandPalette.jsx';
+import SubmitDesk from '../components/dash/SubmitDesk.jsx';
+import ProfileDrawer from '../components/dash/ProfileDrawer.jsx';
 import BlurText from '../components/rb/BlurText.jsx';
 import { HugeiconsIcon } from '@hugeicons/react';
 import {
@@ -28,9 +31,37 @@ const TABS = [
   { id: 'events', label: 'Events' }
 ];
 
-export default function Dashboard({ user, tab, joined, onJoin, onLogout }) {
+const SAVED = 'cc-saved';
+const loadSaved = () => { try { return JSON.parse(localStorage.getItem(SAVED)) || []; } catch { return []; } };
+
+export default function Dashboard({ user, tab, joined, onJoin, onLogout, onUpdateUser }) {
   const [toast, setToast] = useState(null);
   const [open, setOpen] = useState(null); // event shown in the details modal
+  const [cmd, setCmd] = useState(false);
+  const [drawer, setDrawer] = useState(false);
+  const [saved, setSaved] = useState(loadSaved);
+
+  useEffect(() => { try { localStorage.setItem(SAVED, JSON.stringify(saved)); } catch { /* storage off */ } }, [saved]);
+  const toggleSave = e => {
+    const on = saved.includes(e.id);
+    setSaved(s => (on ? s.filter(x => x !== e.id) : [...s, e.id]));
+    notify(on ? `Removed ${e.title} from saved` : `Saved ${e.title} for later`);
+  };
+
+  // keyboard: Ctrl/⌘K palette, 1/2/3 tabs
+  useEffect(() => {
+    const onKey = e => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); setCmd(c => !c); return; }
+      const t = e.target;
+      if (t.closest && t.closest('input, textarea, select, [contenteditable]')) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key === '/') { e.preventDefault(); setCmd(true); }
+      const to = { 1: 'overview', 2: 'my-events', 3: 'events' }[e.key];
+      if (to) go(`/dashboard/${to}`);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   const mine = events.filter(e => joined.includes(e.id));
   const current = TABS.some(t => t.id === tab) ? tab : 'overview';
@@ -51,9 +82,25 @@ export default function Dashboard({ user, tab, joined, onJoin, onLogout }) {
     notify(`${e.title} added to My events`, { label: 'View', to: '/dashboard/my-events' });
   };
 
+  const commands = [
+    { id: 'p-ov', group: 'Go to', label: 'Overview', icon: '⌂', kbd: '1', run: () => go('/dashboard/overview') },
+    { id: 'p-my', group: 'Go to', label: 'My events', icon: '◫', kbd: '2', hint: `${mine.length} passes`, run: () => go('/dashboard/my-events') },
+    { id: 'p-ev', group: 'Go to', label: 'Events', icon: '✈', kbd: '3', run: () => go('/dashboard/events') },
+    { id: 'p-sub', group: 'Go to', label: 'Submission desk', icon: '↥', hint: 'Round 2', run: () => { go('/dashboard/overview'); setTimeout(() => window.__lenis?.scrollTo('#submit', { offset: -100 }), 450); } },
+    ...events.filter(e => e.phase !== 'completed').map(e => ({
+      id: 'e-' + e.id, group: 'Events', label: e.title, icon: joined.includes(e.id) ? '✓' : '＋', hint: `${e.track} · ${fmtDate(e.starts)}`, run: () => setOpen(e)
+    })),
+    { id: 'a-prof', group: 'Actions', label: 'Edit profile', icon: '✎', run: () => setDrawer(true) },
+    { id: 'a-id', group: 'Actions', label: 'Download Digital ID', icon: '↓', run: () => notify('Digital ID saved to downloads') },
+    { id: 'a-web', group: 'Actions', label: 'Back to website', icon: '↗', run: () => go('/') },
+    { id: 'a-out', group: 'Actions', label: 'Log out', icon: '⎋', run: onLogout }
+  ];
+
   return (
     <div className="dash">
-      <TopBar user={user} current={current} myCount={mine.length} onLogout={onLogout} />
+      <TopBar user={user} current={current} myCount={mine.length} onLogout={onLogout} onCmd={() => setCmd(true)} onProfile={() => setDrawer(true)} />
+      <CommandPalette open={cmd} onClose={() => setCmd(false)} commands={commands} />
+      <ProfileDrawer open={drawer} onClose={() => setDrawer(false)} user={user} onSave={onUpdateUser} notify={notify} />
 
       <main className="wrap dash__main">
         <AnimatePresence mode="wait">
@@ -66,7 +113,7 @@ export default function Dashboard({ user, tab, joined, onJoin, onLogout }) {
           >
             {current === 'overview' && <Overview user={user} mine={mine} joined={joined} onOpen={setOpen} notify={notify} />}
             {current === 'my-events' && <MyEvents mine={mine} notify={notify} />}
-            {current === 'events' && <Events joined={joined} onOpen={setOpen} onRegister={register} />}
+            {current === 'events' && <Events joined={joined} onOpen={setOpen} onRegister={register} saved={saved} onSave={toggleSave} />}
           </motion.div>
         </AnimatePresence>
       </main>
@@ -85,7 +132,7 @@ export default function Dashboard({ user, tab, joined, onJoin, onLogout }) {
             { label: 'Events', icon: ic(Calendar03Icon), active: current === 'events', onClick: () => go('/dashboard/events') },
             { label: 'Certificates', icon: ic(Certificate01Icon), onClick: () => notify('1 certificate ready · FirstCommit \'26 Quiz 2.0') },
             { label: 'Alerts', icon: ic(Notification03Icon), badge: notifications.length, onClick: () => notify(notifications[0].title + ' · ' + notifications[0].body) },
-            { label: 'Digital ID', icon: ic(IdIcon), onClick: () => go('/dashboard/overview') },
+            { label: 'Profile', icon: ic(IdIcon), onClick: () => setDrawer(true) },
             { label: 'Website', icon: ic(Globe02Icon), onClick: () => go('/') },
             { label: 'Log out', icon: ic(Logout01Icon), onClick: onLogout }
           ]}
@@ -121,7 +168,7 @@ export default function Dashboard({ user, tab, joined, onJoin, onLogout }) {
 }
 
 /* ---------------- Top bar with tabs, notifications, profile ---------------- */
-function TopBar({ user, current, myCount, onLogout }) {
+function TopBar({ user, current, myCount, onLogout, onCmd, onProfile }) {
   const [menu, setMenu] = useState(null); // 'bell' | 'me' | null
   const ref = useRef(null);
 
@@ -152,6 +199,11 @@ function TopBar({ user, current, myCount, onLogout }) {
         </nav>
 
         <div className="topbar__right">
+          <button className="cmdk-btn" onClick={onCmd} aria-label="Open command palette">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+            <span>Search</span>
+            <kbd>Ctrl K</kbd>
+          </button>
           <div className="pop-wrap">
             <button className="icon-btn" aria-label="Notifications" onClick={() => setMenu(m => (m === 'bell' ? null : 'bell'))}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
@@ -190,6 +242,7 @@ function TopBar({ user, current, myCount, onLogout }) {
               {menu === 'me' && (
                 <motion.div className="pop pop--sm" initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}>
                   <p className="label pop__head">{user.email}</p>
+                  <button className="pop__link" onClick={() => { setMenu(null); onProfile(); }}>Edit profile</button>
                   <a className="pop__link" href="#/dashboard/overview">Digital ID</a>
                   <a className="pop__link" href="#/">Back to website</a>
                   <button className="pop__link pop__link--danger" onClick={onLogout}>Log out</button>
@@ -238,6 +291,8 @@ function Overview({ user, mine, onOpen, notify, joined }) {
         <IdCard user={user} notify={notify} />
       </div>
 
+      {live && <SubmitDesk event={live} user={user} notify={notify} />}
+
       <div className="stats">
         {stats.map(s => (
           <SpotlightCard key={s.l} className="stat" theme="light" spotlightColor="#7665ff" intensity={0.35} spotlightSize={200}>
@@ -258,7 +313,7 @@ function Overview({ user, mine, onOpen, notify, joined }) {
           </div>
           <ol className="agenda">
             {[
-              { d: '07 NOV', t: '8:00 PM', title: "ReBuild '26 · Round 2 submission", tag: 'Deadline', hot: true },
+              { d: '08 NOV', t: '11:00 AM', title: "ReBuild '26 · Round 2 submission", tag: 'Extended deadline', hot: true },
               { d: '09 NOV', t: 'All day', title: 'Round 3 interview shortlist', tag: 'Results' },
               { d: '10 NOV', t: '10:00 AM', title: 'Participation certificates issued', tag: 'Certificate' },
               { d: '14 NOV', t: '6:00 PM', title: "FirstCommit '26 Quiz · Prelims", tag: 'Event' }
@@ -463,7 +518,7 @@ function IdCard({ user, notify }) {
 }
 
 const ACTIVITY = [
-  { icon: '✦', title: 'Round 2 is live', description: "ReBuild '26 · submit by 8:00 PM", meta: '2h' },
+  { icon: '✦', title: 'Round 2 is live', description: "ReBuild '26 · extended to 11:00 AM, 8 Nov", meta: '2h' },
   { icon: '✓', title: 'Shortlisted for Round 2', description: "ReBuild '26 · Team Inevitable", meta: '1d' },
   { icon: '★', title: 'Certificate issued', description: "FirstCommit '26 Quiz 2.0", meta: '9d' },
   { icon: '↗', title: 'Registered for Quiz prelims', description: "FirstCommit '26 Quiz", meta: '12d' },
@@ -578,16 +633,18 @@ function WalletPass({ event: e, notify }) {
 }
 
 /* ---------------- EVENTS ---------------- */
-function Events({ joined, onOpen, onRegister }) {
+function Events({ joined, onOpen, onRegister, saved, onSave }) {
   const [q, setQ] = useState('');
   const [track, setTrack] = useState('All');
   const [sort, setSort] = useState('soonest');
+  const [loading, setLoading] = useState(true);
+  useEffect(() => { const t = setTimeout(() => setLoading(false), 650); return () => clearTimeout(t); }, []);
 
   const list = useMemo(() => {
     const term = q.trim().toLowerCase();
     const out = events
       .filter(e => e.phase !== 'completed')
-      .filter(e => track === 'All' || e.track === track)
+      .filter(e => track === 'All' || (track === 'Saved' ? saved.includes(e.id) : e.track === track))
       .filter(e => !term || `${e.title} ${e.track} ${e.host}`.toLowerCase().includes(term));
     const by = {
       soonest: (a, b) => new Date(a.starts) - new Date(b.starts),
@@ -595,7 +652,7 @@ function Events({ joined, onOpen, onRegister }) {
       seats: (a, b) => b.seats - b.registered - (a.seats - a.registered)
     }[sort];
     return [...out].sort(by);
-  }, [q, track, sort]);
+  }, [q, track, sort, saved]);
 
   return (
     <>
@@ -616,9 +673,9 @@ function Events({ joined, onOpen, onRegister }) {
 
       <div className="toolbar">
         <div className="chips">
-          {TRACKS.map(t => (
-            <button key={t} className={`chip ${track === t ? 'is-on' : ''}`} onClick={() => setTrack(t)}>
-              {t}
+          {[...TRACKS, 'Saved'].map(t => (
+            <button key={t} className={`chip ${track === t ? 'is-on' : ''} ${t === 'Saved' ? 'chip--saved' : ''}`} onClick={() => setTrack(t)}>
+              {t === 'Saved' ? `★ Saved ${saved.length}` : t}
             </button>
           ))}
         </div>
@@ -632,6 +689,19 @@ function Events({ joined, onOpen, onRegister }) {
         </label>
       </div>
 
+      {loading ? (
+        <div className="event-grid">
+          {[0, 1, 2, 3].map(i => (
+            <div key={i} className="skel">
+              <span className="skel__line skel__line--sm" />
+              <span className="skel__line skel__line--lg" />
+              <span className="skel__line" />
+              <span className="skel__line skel__line--md" />
+              <span className="skel__block" />
+            </div>
+          ))}
+        </div>
+      ) : (
       <motion.div layout className="event-grid">
         <AnimatePresence mode="popLayout">
           {list.map(e => (
@@ -643,12 +713,13 @@ function Events({ joined, onOpen, onRegister }) {
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.35, ease: EASE }}
             >
-              <EventPass event={e} joined={joined.includes(e.id)} onOpen={onOpen} onRegister={onRegister} />
+              <EventPass event={e} joined={joined.includes(e.id)} onOpen={onOpen} onRegister={onRegister} isSaved={saved.includes(e.id)} onSave={onSave} />
             </motion.div>
           ))}
         </AnimatePresence>
       </motion.div>
-      {!list.length && (
+      )}
+      {!loading && !list.length && (
         <div className="empty">
           <p className="label">No matches</p>
           <p>Try another track or search term.</p>
@@ -659,7 +730,7 @@ function Events({ joined, onOpen, onRegister }) {
   );
 }
 
-function EventPass({ event: e, joined, onOpen, onRegister }) {
+function EventPass({ event: e, joined, onOpen, onRegister, isSaved, onSave }) {
   const left = e.seats - e.registered;
   const fill = Math.round((e.registered / e.seats) * 100);
   const cls = { live: 'live', open: 'open', upcoming: 'soon' }[e.phase];
@@ -680,7 +751,20 @@ function EventPass({ event: e, joined, onOpen, onRegister }) {
     >
       <div className="wpass__top">
         <span className={`status status--${cls}`}>{PHASE_LABEL[e.phase]}</span>
-        <span className="label">{e.track}</span>
+        <span className="epass__right">
+          <span className="label">{e.track}</span>
+          <motion.button
+            className={`save-btn ${isSaved ? 'is-on' : ''}`}
+            onClick={() => onSave(e)}
+            whileTap={{ scale: 0.8 }}
+            aria-label={isSaved ? 'Remove from saved' : 'Save for later'}
+            aria-pressed={isSaved}
+          >
+            <motion.span key={String(isSaved)} initial={{ scale: 0.4, rotate: -40 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 500, damping: 15 }}>
+              {isSaved ? '★' : '☆'}
+            </motion.span>
+          </motion.button>
+        </span>
       </div>
       <button className="epass__title" onClick={() => onOpen(e)}>
         {e.title} <span>↗</span>

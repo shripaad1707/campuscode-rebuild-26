@@ -22,7 +22,7 @@ export const events = [
     track: 'Web Development',
     phase: 'live',
     starts: '2026-11-06T08:00:00+05:30',
-    ends: '2026-11-07T20:00:00+05:30',
+    ends: '2026-11-08T11:00:00+05:30',
     mode: 'Online',
     team: 'Solo',
     seats: 500,
@@ -174,7 +174,7 @@ export const events = [
 export const TRACKS = ['All', 'AI', 'Web Development', 'Design', 'Smart Tech', 'Quiz'];
 
 export const notifications = [
-  { id: 1, title: 'Round 2 is live', body: "ReBuild '26 · submit by 8:00 PM IST", time: '2h' },
+  { id: 1, title: 'Round 2 is live', body: "ReBuild '26 · extended · submit by 11:00 AM, 8 Nov", time: '2h' },
   { id: 2, title: 'You were shortlisted', body: 'Top performers from Round 1 move on', time: '12h' },
   { id: 3, title: 'Certificate ready', body: "FirstCommit '26 Quiz 2.0", time: '6d' }
 ];

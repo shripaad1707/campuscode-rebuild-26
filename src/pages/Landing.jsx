@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { motion, useMotionValue, useScroll, useSpring, useTransform } from 'motion/react';
+import { AnimatePresence, motion, useMotionValue, useScroll, useSpring, useTransform } from 'motion/react';
 import Nav from '../components/Nav.jsx';
 import Footer from '../components/Footer.jsx';
 import Ticket from '../components/Ticket.jsx';
@@ -36,6 +36,7 @@ export default function Landing({ user }) {
       <Tracks />
       <Stamps />
       <Numbers />
+      <Faq />
       <TearCta />
       <Footer />
     </div>
@@ -413,6 +414,50 @@ function StampCard({ f, i }) {
         </div>
       </GlareHover>
     </Reveal>
+  );
+}
+
+/* ---------------- FAQ: boarding questions ---------------- */
+const FAQS = [
+  { q: 'Who can join CampusCode events?', a: 'Any college student. Sign up once, get a Digital ID, and use it to register for every hackathon, quiz and design sprint on the platform.' },
+  { q: 'Do I need a team to register?', a: 'No. You can register solo and find teammates later on HackMate by skill, college or CampusCode ID. Team sizes are listed on every event.' },
+  { q: 'How do rounds and shortlists work?', a: 'Each event has its own rounds. Results, shortlists and the next round appear on your dashboard the moment they are announced, so you never chase updates in group chats.' },
+  { q: 'Is it free?', a: 'Most events are free. When an event has a fee, it is shown clearly on the event page before you register.' },
+  { q: 'How do I get my certificate?', a: 'Certificates are issued to your dashboard the day results are out. Every certificate carries a verification ID that anyone can check.' }
+];
+
+function Faq() {
+  const [open, setOpen] = useState(0);
+  return (
+    <section className="section wrap" id="faq">
+      <div className="faq">
+        <div>
+          <SectionHead n="06" label="Before you board" title="QUESTIONS." />
+          <p className="faq__lead">Still unsure? Ask RuleBot inside the dashboard, it answers from the official rules in seconds.</p>
+        </div>
+        <div className="faq__list">
+          {FAQS.map((f, i) => {
+            const on = open === i;
+            return (
+              <div key={f.q} className={`faq__item ${on ? 'is-on' : ''}`}>
+                <button className="faq__q" onClick={() => setOpen(on ? -1 : i)} aria-expanded={on}>
+                  <span className="mono faq__n">{String(i + 1).padStart(2, '0')}</span>
+                  <span>{f.q}</span>
+                  <span className="faq__plus"><motion.span animate={{ rotate: on ? 45 : 0 }} transition={{ duration: 0.3, ease: EASE }}>+</motion.span></span>
+                </button>
+                <AnimatePresence initial={false}>
+                  {on && (
+                    <motion.div className="faq__a" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.4, ease: EASE }}>
+                      <p>{f.a}</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
   );
 }
 

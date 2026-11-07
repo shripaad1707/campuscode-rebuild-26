@@ -29,3 +29,11 @@ More React Bits components across every page:
 - **Landing:** DotGrid (interactive hero field), RotatingText, CircularText seal, ShinyText, BlurText section titles, Stack (draggable track deck), GlareHover feature cards, Counter (rolling numbers), MagnetLines + GradientText CTA, StarBorder nav button
 - **Login / Register:** DotGrid background, DecryptedText title, StarBorder buttons, ShinyText, RotatingText perks
 - **Dashboard:** Dock navigation, TiltedCard Digital ID (tilt + flip), Folder certificates, AnimatedList activity feed, Counter stats, BlurText headings
+
+## Pro features (v3)
+
+- **Command palette** (`Ctrl/⌘ + K` or `/`): jump to pages, open any event, run actions. `1` `2` `3` switch tabs.
+- **Submission desk**: validated GitHub / demo / note fields, live checklist, deadline countdown, team card with copyable invite code, edit after submitting.
+- **Saved events**: star any event, filter by Saved (persists in localStorage).
+- **Profile drawer**: edit name, college, year and team (updates the Digital ID live) plus notification toggles.
+- **Skeleton loading** on the events grid, **FAQ** accordion on the landing page, **forgot password** flow on login.
