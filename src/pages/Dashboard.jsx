@@ -5,12 +5,23 @@ import Ticket from '../components/Ticket.jsx';
 import Barcode from '../components/Barcode.jsx';
 import QR from '../components/QR.jsx';
 import useCountdown from '../components/useCountdown.js';
-import CountUp from '../components/rb/CountUp.jsx';
+import Counter from '../components/rb/Counter.jsx';
+import Dock from '../components/rb/Dock.jsx';
+import TiltedCard from '../components/rb/TiltedCard.jsx';
+import Folder from '../components/rb/Folder.jsx';
+import AnimatedList from '../components/rb/AnimatedList.jsx';
+import ShinyText from '../components/rb/ShinyText.jsx';
+import BlurText from '../components/rb/BlurText.jsx';
+import { HugeiconsIcon } from '@hugeicons/react';
+import {
+  Home01Icon, Ticket01Icon, Calendar03Icon, Notification03Icon, IdIcon, Globe02Icon, Logout01Icon, Certificate01Icon
+} from '@hugeicons/core-free-icons';
 import SpotlightCard from '../components/rb/SpotlightCard.jsx';
 import { events, notifications, TRACKS, PHASE_LABEL, fmtDate, fmtTime } from '../data/events.js';
 import { go } from '../App.jsx';
 
 const EASE = [0.16, 1, 0.3, 1];
+const ic = icon => <HugeiconsIcon icon={icon} size={22} strokeWidth={1.7} />;
 const TABS = [
   { id: 'overview', label: 'Overview' },
   { id: 'my-events', label: 'My events' },
@@ -59,6 +70,27 @@ export default function Dashboard({ user, tab, joined, onJoin, onLogout }) {
           </motion.div>
         </AnimatePresence>
       </main>
+
+      <div className="dash__dock">
+        <Dock
+          theme="light"
+          accentColor="#7665ff"
+          badgeColor="#7665ff"
+          baseItemSize={48}
+          magnification={68}
+          panelHeight={64}
+          items={[
+            { label: 'Overview', icon: ic(Home01Icon), active: current === 'overview', onClick: () => go('/dashboard/overview') },
+            { label: 'My events', icon: ic(Ticket01Icon), active: current === 'my-events', badge: mine.length || undefined, onClick: () => go('/dashboard/my-events') },
+            { label: 'Events', icon: ic(Calendar03Icon), active: current === 'events', onClick: () => go('/dashboard/events') },
+            { label: 'Certificates', icon: ic(Certificate01Icon), onClick: () => notify('1 certificate ready · FirstCommit \'26 Quiz 2.0') },
+            { label: 'Alerts', icon: ic(Notification03Icon), badge: notifications.length, onClick: () => notify(notifications[0].title + ' · ' + notifications[0].body) },
+            { label: 'Digital ID', icon: ic(IdIcon), onClick: () => go('/dashboard/overview') },
+            { label: 'Website', icon: ic(Globe02Icon), onClick: () => go('/') },
+            { label: 'Log out', icon: ic(Logout01Icon), onClick: onLogout }
+          ]}
+        />
+      </div>
 
       <AnimatePresence>
         {open && <EventModal event={open} joined={joined.includes(open.id)} onClose={() => setOpen(null)} onRegister={register} />}
@@ -190,7 +222,7 @@ function Overview({ user, mine, onOpen, notify, joined }) {
         label={`Student dashboard · ${today}`}
         title={
           <>
-            WELCOME BACK, <em>{user.name.split(' ')[0].toUpperCase()}.</em>
+            WELCOME BACK, <em><BlurText text={user.name.split(' ')[0].toUpperCase() + '.'} animateBy="letters" delay={60} className="phead__blur" /></em>
           </>
         }
         right={
@@ -211,7 +243,7 @@ function Overview({ user, mine, onOpen, notify, joined }) {
           <SpotlightCard key={s.l} className="stat" theme="light" spotlightColor="#7665ff" intensity={0.35} spotlightSize={200}>
             <p className="label">{s.l}</p>
             <p className="stat__value">
-              <CountUp to={s.v} duration={1.2} />
+              <Counter value={s.v} fontSize="1em" fontWeight={900} duration={0.9} minDigits={2} />
             </p>
             <p className="stat__note">{s.n}</p>
           </SpotlightCard>
@@ -266,6 +298,48 @@ function Overview({ user, mine, onOpen, notify, joined }) {
               <p className="muted">You've joined every open event. Nice.</p>
             )}
           </div>
+        </section>
+      </div>
+
+      <div className="ov-grid ov-grid--even">
+        <section className="panel panel--folder">
+          <div className="panel__head">
+            <p className="label">Certificates folder</p>
+            <span className="label purple">Click to open</span>
+          </div>
+          <div className="certs-stage">
+            <Folder
+              theme="light"
+              color="#7665ff"
+              paperColor="#ffffff"
+              label="2026"
+              size={1.15}
+              zoomOnClick={false}
+              items={[
+                { title: 'FirstCommit Quiz 2.0', description: 'Participation · Verified' },
+                { title: "FirstCommit '26 Quiz", description: 'Prelims · Pending' },
+                { title: "ReBuild '26", description: 'Round 1 · Shortlisted' }
+              ]}
+              onItemClick={() => notify('Certificate opened · verification ID CC-26-CERT-0417')}
+            />
+          </div>
+          <p className="muted folder-note">Certificates land here the day results are announced. Each one carries a verifiable ID.</p>
+        </section>
+
+        <section className="panel">
+          <div className="panel__head">
+            <p className="label">Activity</p>
+            <span className="label">Hover · arrow keys</span>
+          </div>
+          <AnimatedList
+            theme="light"
+            accentColor="#7665ff"
+            width="100%"
+            maxHeight={300}
+            frame={false}
+            items={ACTIVITY}
+            onItemSelect={item => notify(item.title)}
+          />
         </section>
       </div>
     </>
@@ -334,48 +408,69 @@ function Rounds({ rounds }) {
 
 // Digital ID card — click to flip and see the back
 function IdCard({ user, notify }) {
-  const [flipped, setFlipped] = useState(false);
+  const front = (
+    <div className="idcard__face idcard__front">
+      <div className="idcard__head">
+        <span className="label">Digital ID</span>
+        <span className="label purple">{user.role}</span>
+      </div>
+      <p className="idcard__name">{user.name}</p>
+      <p className="label">{user.college} · {user.year}</p>
+      <div className="idcard__row">
+        <div>
+          <p className="label">CampusCode ID</p>
+          <p className="mono idcard__id">{user.id}</p>
+        </div>
+        <QR value={user.id + user.name} size={84} />
+      </div>
+      <p className="label idcard__hint">Tilt · click to flip ↻</p>
+    </div>
+  );
+  const back = (
+    <div className="idcard__face idcard__back">
+      <Logo href="#/dashboard" />
+      <p className="label">Present this ID at check-in. Teammates can find you on HackMate with your CampusCode ID.</p>
+      <Barcode value={user.id} height={44} />
+      <p className="label">Valid · 2026–27</p>
+    </div>
+  );
   return (
     <div className="idcard-wrap">
-      <motion.div
-        className="idcard"
-        animate={{ rotateY: flipped ? 180 : 0 }}
-        transition={{ duration: 0.7, ease: EASE }}
-        onClick={() => setFlipped(f => !f)}
-        role="button"
-        tabIndex={0}
-        aria-label="Flip Digital ID"
-        onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setFlipped(f => !f)}
+      <TiltedCard
+        className="idcard-tilt"
+        containerWidth="100%"
+        containerHeight="300px"
+        imageWidth="100%"
+        imageHeight="300px"
+        radius={2}
+        rotateAmplitude={10}
+        scaleOnHover={1.03}
+        showTooltip={false}
+        glare={0.35}
+        glareColor="#7665ff"
+        shadow={0.25}
+        backContent={back}
+        flipOnClick
+        altText="Digital ID"
       >
-        <div className="idcard__face idcard__front">
-          <div className="idcard__head">
-            <span className="label">Digital ID</span>
-            <span className="label purple">{user.role}</span>
-          </div>
-          <p className="idcard__name">{user.name}</p>
-          <p className="label">{user.college} · {user.year}</p>
-          <div className="idcard__row">
-            <div>
-              <p className="label">CampusCode ID</p>
-              <p className="mono idcard__id">{user.id}</p>
-            </div>
-            <QR value={user.id + user.name} size={84} />
-          </div>
-          <p className="label idcard__hint">Tap to flip ↻</p>
-        </div>
-        <div className="idcard__face idcard__back">
-          <Logo href="#/dashboard" />
-          <p className="label">Present this ID at check-in. Teammates can find you on HackMate with your CampusCode ID.</p>
-          <Barcode value={user.id} height={44} />
-          <p className="label">Valid · 2026–27</p>
-        </div>
-      </motion.div>
+        {front}
+      </TiltedCard>
       <button className="btn btn--block" onClick={() => notify('Digital ID saved to downloads')}>
         Download ID ↓
       </button>
     </div>
   );
 }
+
+const ACTIVITY = [
+  { icon: '✦', title: 'Round 2 is live', description: "ReBuild '26 · submit by 8:00 PM", meta: '2h' },
+  { icon: '✓', title: 'Shortlisted for Round 2', description: "ReBuild '26 · Team Inevitable", meta: '1d' },
+  { icon: '★', title: 'Certificate issued', description: "FirstCommit '26 Quiz 2.0", meta: '9d' },
+  { icon: '↗', title: 'Registered for Quiz prelims', description: "FirstCommit '26 Quiz", meta: '12d' },
+  { icon: '⌘', title: 'HackMate match', description: 'A designer from JNTU viewed your ID', meta: '2w' },
+  { icon: '◎', title: 'IdeaCheck score: 82', description: 'Your idea looks original', meta: '2w' },
+  { icon: '✦', title: 'Welcome to CampusCode', description: 'Your Digital ID was printed', meta: '3w' }
+];
 
 /* ---------------- MY EVENTS ---------------- */
 const MY_FILTERS = [
@@ -668,7 +763,7 @@ function PageHead({ n, label, title, right }) {
         <span className="purple">{n}</span> &nbsp; {label}
       </p>
       <div className="phead__row">
-        <h1>{title}</h1>
+        <h1>{typeof title === 'string' ? <BlurText text={title} animateBy="letters" delay={45} className="phead__blur" /> : title}</h1>
         {right}
       </div>
     </div>

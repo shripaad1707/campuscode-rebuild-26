@@ -8,6 +8,10 @@ import { useCaptcha } from '../components/Captcha.jsx';
 import useCountdown from '../components/useCountdown.js';
 import { demoUser, events } from '../data/events.js';
 import { go } from '../App.jsx';
+import DotGrid from '../components/rb/DotGrid.jsx';
+import StarBorder from '../components/rb/StarBorder.jsx';
+import DecryptedText from '../components/rb/DecryptedText.jsx';
+import ShinyText from '../components/rb/ShinyText.jsx';
 
 const EASE = [0.16, 1, 0.3, 1];
 const isEmail = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
@@ -46,6 +50,9 @@ export default function Login({ onLogin }) {
 
   return (
     <div className="auth page--grid">
+      <div className="auth__dots" aria-hidden="true">
+        <DotGrid dotSize={3} gap={26} baseColor="#d9d9d2" activeColor="#7665ff" proximity={150} shockRadius={260} shockStrength={4} glow={0.2} />
+      </div>
       <header className="auth__bar wrap">
         <Logo />
         <a className="btn btn--ghost" href="#/register">New here? Create a pass ↗</a>
@@ -88,7 +95,7 @@ export default function Login({ onLogin }) {
               <div className="auth__ticket-head">
                 <div>
                   <p className="label">Boarding pass</p>
-                  <h2>LOGIN</h2>
+                  <h2><DecryptedText text="LOGIN" animateOn="view" sequential revealDirection="start" speed={60} characters="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#" /></h2>
                 </div>
                 <button type="button" className="chip" onClick={fillDemo}>Use demo account</button>
               </div>
@@ -109,9 +116,9 @@ export default function Login({ onLogin }) {
                 <input type="checkbox" defaultChecked /> <span>Keep me signed in</span>
               </label>
 
-              <button className="btn btn--dark btn--block auth__submit" disabled={loading}>
+              <StarBorder type="submit" className="auth__submit auth__star" disabled={loading} backgroundColor="#111111" textColor="#ffffff" color="#a8e62e" radius={10} duration={3} stars={2} glow={0.8}>
                 {loading ? 'Checking you in…' : 'Check in ↗'}
-              </button>
+              </StarBorder>
 
               <p className="auth__switch">
                 No pass yet? <a href="#/register">Register as a builder</a>
@@ -133,7 +140,7 @@ function Waiting() {
       <div className="waiting__item">
         <span className="dot dot--live" />
         <div>
-          <p className="waiting__title">{live.title} · Round 2 closes in</p>
+          <p className="waiting__title"><ShinyText text={`${live.title} · Round 2 closes in`} color="#111111" shineColor="#7665ff" speed={2.6} /></p>
           <p className="waiting__time mono">
             {t.d}D {t.h}:{t.m}:{t.s}
           </p>

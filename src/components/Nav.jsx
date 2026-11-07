@@ -1,5 +1,6 @@
 import Logo from './Logo.jsx';
 import Magnet from './rb/Magnet.jsx';
+import StarBorder from './rb/StarBorder.jsx';
 
 export default function Nav({ user }) {
   return (
@@ -9,6 +10,7 @@ export default function Nav({ user }) {
         <nav className="nav__links" aria-label="Main">
           <a href="#/" onClick={e => scrollTo(e, 'departures')}>Events</a>
           <a href="#/" onClick={e => scrollTo(e, 'route')}>How it works</a>
+          <a href="#/" onClick={e => scrollTo(e, 'tracks')}>Tracks</a>
           <a href="#/" onClick={e => scrollTo(e, 'stamps')}>Platform</a>
         </nav>
         <div className="nav__actions">
@@ -18,7 +20,9 @@ export default function Nav({ user }) {
             <>
               <a className="btn btn--ghost" href="#/login">Login</a>
               <Magnet padding={40} magnetStrength={4}>
-                <a className="btn btn--dark" href="#/register">Join CampusCode ↗</a>
+                <StarBorder as="a" href="#/register" className="nav__star" backgroundColor="#111111" textColor="#ffffff" color="#a8e62e" radius={10} duration={3.2} glow={0.8} stars={2}>
+                  Join CampusCode ↗
+                </StarBorder>
               </Magnet>
             </>
           )}

@@ -8,6 +8,10 @@ import Barcode from '../components/Barcode.jsx';
 import { useCaptcha } from '../components/Captcha.jsx';
 import { TEAM_NAME } from '../data/events.js';
 import { go } from '../App.jsx';
+import DotGrid from '../components/rb/DotGrid.jsx';
+import StarBorder from '../components/rb/StarBorder.jsx';
+import ShinyText from '../components/rb/ShinyText.jsx';
+import RotatingText from '../components/rb/RotatingText.jsx';
 
 const EASE = [0.16, 1, 0.3, 1];
 const STEPS = ['Details', 'Profile', 'Verify'];
@@ -86,6 +90,9 @@ export default function Register({ onRegister }) {
 
   return (
     <div className="auth page--grid">
+      <div className="auth__dots" aria-hidden="true">
+        <DotGrid dotSize={3} gap={26} baseColor="#d9d9d2" activeColor="#7665ff" proximity={150} shockRadius={260} shockStrength={4} glow={0.2} />
+      </div>
       <header className="auth__bar wrap">
         <Logo />
         <a className="btn btn--ghost" href="#/login">Already have a pass? Login ↗</a>
@@ -157,7 +164,20 @@ export default function Register({ onRegister }) {
               )}
             </AnimatePresence>
           </motion.div>
-          <p className="reg__note label">Your pass updates as you type →</p>
+          <p className="reg__note label">
+            <ShinyText text="Your pass updates as you type →" color="#6b6b66" shineColor="#7665ff" speed={2.2} />
+          </p>
+          <div className="reg__perks">
+            <span className="label">Your pass unlocks</span>
+            <RotatingText
+              texts={['HACKMATE', 'IDEACHECK', 'RULEBOT', 'LIVE ROUNDS', 'CERTIFICATES']}
+              mainClassName="reg__rot"
+              staggerFrom="first"
+              staggerDuration={0.02}
+              rotationInterval={2000}
+              transition={{ type: 'spring', damping: 30, stiffness: 400 }}
+            />
+          </div>
         </section>
 
         {/* RIGHT: 3-step form */}
@@ -284,7 +304,9 @@ export default function Register({ onRegister }) {
                       ← Back
                     </button>
                   )}
-                  <button className="btn btn--dark reg__next">{step === 2 ? 'Print my pass ↗' : 'Continue →'}</button>
+                  <StarBorder type="submit" className="reg__next reg__star" backgroundColor="#111111" textColor="#ffffff" color="#a8e62e" radius={10} duration={3} stars={step === 2 ? 3 : 1} glow={0.8}>
+                    {step === 2 ? 'Print my pass ↗' : 'Continue →'}
+                  </StarBorder>
                 </div>
               </form>
             ) : (

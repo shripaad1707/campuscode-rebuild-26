@@ -21,3 +21,11 @@ React 19 + Vite, Motion (`motion/react`), Lenis smooth scroll, React Bits (Count
 npm install
 npm run dev
 ```
+
+## Motion upgrade (v2)
+
+More React Bits components across every page:
+
+- **Landing:** DotGrid (interactive hero field), RotatingText, CircularText seal, ShinyText, BlurText section titles, Stack (draggable track deck), GlareHover feature cards, Counter (rolling numbers), MagnetLines + GradientText CTA, StarBorder nav button
+- **Login / Register:** DotGrid background, DecryptedText title, StarBorder buttons, ShinyText, RotatingText perks
+- **Dashboard:** Dock navigation, TiltedCard Digital ID (tilt + flip), Folder certificates, AnimatedList activity feed, Counter stats, BlurText headings

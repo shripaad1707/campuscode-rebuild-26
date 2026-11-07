@@ -593,3 +593,102 @@
 .marquee__word { display: inline-flex; align-items: center; gap: 0.5em; padding-right: 0.5em; }
 .marquee__star { font-size: 0.5em; }
 .magnet-wrap, [class*="magnet"] { display: block; }
+
+/* =========================================================
+   MOTION UPGRADE · React Bits layer
+   ========================================================= */
+/* Hero: interactive dot field behind the pass */
+.hero { position: relative; }
+.hero__dots { position: absolute; inset: -20px 0 0; z-index: 0; opacity: 0.9;
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 45%, #000 40%, transparent 85%);
+          mask-image: radial-gradient(ellipse 80% 70% at 50% 45%, #000 40%, transparent 85%); }
+.hero__meta, .hero__stage, .hero__foot { position: relative; z-index: 1; }
+.hero__seal { display: flex; justify-content: center; margin: auto 0 22px; }
+.hero__seal .circular-text { background: var(--lime); border-radius: 50%; }
+.hero__seal-core { font-size: 26px; color: var(--purple); }
+.hero__for { display: flex; align-items: center; gap: 14px; margin-top: 22px; position: relative; z-index: 1; }
+.hero__rot { display: inline-flex; overflow: hidden; background: var(--purple); color: #fff; font-weight: 900;
+  letter-spacing: -0.02em; font-size: 22px; padding: 6px 14px; border-radius: 8px; line-height: 1.1; }
+.hero__rot .text-rotate-element { display: inline-block; }
+
+/* Section heads: blur-in words */
+.section-head__blur { display: flex; flex-wrap: wrap; column-gap: 0.25em; }
+
+/* Tracks deck */
+.tracks { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+.tracks__lead { color: var(--muted); max-width: 440px; margin-top: -12px; font-size: 16px; }
+.tracks__list { list-style: none; padding: 0; margin: 28px 0 0; display: grid; gap: 0; border-top: 1px solid var(--border); max-width: 440px; }
+.tracks__list li { padding: 14px 0; border-bottom: 1px solid var(--border); font-weight: 800; letter-spacing: -0.01em; display: flex; gap: 18px; }
+.tracks__list .mono { font-size: 12px; font-weight: 500; width: 76px; }
+.tracks__stack { height: 440px; display: flex; align-items: center; justify-content: center; }
+.tracks__stack > * { width: 320px; height: 400px; }
+.trackcard { width: 100%; height: 100%; padding: 26px; display: flex; flex-direction: column; border: 1px solid var(--border);
+  background: var(--card); color: var(--ink); user-select: none; }
+.trackcard--purple { background: var(--purple); color: #fff; border-color: var(--purple); }
+.trackcard--ink { background: var(--ink); color: #fff; border-color: var(--ink); }
+.trackcard--lime { background: var(--lime); }
+.trackcard--purple .label, .trackcard--ink .label { color: rgba(255, 255, 255, 0.7); }
+.trackcard__top { display: flex; justify-content: space-between; padding-bottom: 16px; border-bottom: 1px dashed currentColor; }
+.trackcard__title { font-weight: 900; font-size: 54px; letter-spacing: -0.05em; line-height: 0.9; margin-top: auto; }
+.trackcard__desc { margin: 14px 0 22px; opacity: 0.75; }
+.trackcard__foot { padding-top: 16px; border-top: 1px dashed currentColor; }
+.trackcard--purple .barcode, .trackcard--ink .barcode { filter: invert(1); }
+
+/* Stamps: glare card */
+.stamp-cell { display: flex; }
+.stamp-cell .stamp-card { width: 100%; }
+
+/* Numbers: rolling counter */
+.numbers__value .counter { font-size: inherit; }
+
+/* CTA: magnet lines + gradient headline */
+.cta__main { position: relative; overflow: hidden; }
+.cta__main > *:not(.cta__lines) { position: relative; z-index: 1; }
+.cta__lines { position: absolute; inset: 0; z-index: 0; opacity: 0.9; }
+.cta__grad { justify-content: flex-start; text-align: left; }
+
+/* Nav star button */
+.nav__star { font-weight: 700; font-size: 14px; }
+
+@media (max-width: 1100px) {
+  .tracks { grid-template-columns: 1fr; gap: 24px; }
+  .hero__seal { display: none; }
+}
+@media (max-width: 760px) {
+  .tracks__stack > * { width: 260px; height: 340px; }
+  .nav__star { font-size: 12px; }
+}
+.section-head__blur { column-gap: 0; }
+.stamp-cell .stamp-card.glare-hover { display: block; text-align: left; padding: 30px 28px 32px; place-items: initial; }
+.cta__lines { opacity: 0.55;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 55%);
+          mask-image: linear-gradient(90deg, transparent 0%, #000 55%); }
+
+/* Auth: interactive dot field + star buttons */
+.auth { position: relative; }
+.auth__dots { position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  -webkit-mask-image: radial-gradient(ellipse 70% 80% at 30% 50%, #000 30%, transparent 80%);
+          mask-image: radial-gradient(ellipse 70% 80% at 30% 50%, #000 30%, transparent 80%); }
+.auth > *:not(.auth__dots) { position: relative; z-index: 1; }
+.auth__star, .reg__star { width: 100%; height: 50px; font-weight: 700; font-size: 15px; }
+.reg__star { flex: 1; width: auto; }
+.reg__perks { display: flex; align-items: center; gap: 12px; margin-top: 20px; }
+.reg__rot { display: inline-flex; overflow: hidden; background: var(--lime); color: var(--ink); font-weight: 900;
+  font-size: 18px; letter-spacing: -0.02em; padding: 5px 12px; border-radius: 8px; line-height: 1.1; }
+
+/* Dashboard: dock, tilt ID, folder, activity */
+.dash { padding-bottom: 120px; }
+.dash__dock { position: fixed; left: 0; right: 0; bottom: 0; height: 120px; z-index: 40; pointer-events: none; }
+.dash__dock .dock { pointer-events: auto; }
+.toast { bottom: 112px !important; }
+.idcard-tilt { width: 100%; }
+.idcard-tilt .tilted-card__body { width: 100% !important; }
+.idcard-tilt .idcard__face { border-radius: 0; }
+.idcard-tilt .idcard__back { transform: none; }
+.idcard-tilt .tilted-card__face { overflow: visible; }
+.phead__blur { display: inline-flex; }
+.panel--folder { display: flex; flex-direction: column; }
+.certs-stage { position: relative; height: 330px; display: flex; align-items: flex-end; padding-bottom: 8px; justify-content: center; }
+.folder-note { margin-top: auto; font-size: 14px; }
+.nav .nav__star.star-border { padding: 0.7rem 1.1rem; }
+@media (max-width: 760px) { .nav .nav__star.star-border { font-size: 12px; padding: 0.55rem 0.8rem; } }

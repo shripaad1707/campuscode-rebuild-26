@@ -6,9 +6,19 @@ import Ticket from '../components/Ticket.jsx';
 import Barcode from '../components/Barcode.jsx';
 import FlapText from '../components/FlapText.jsx';
 import Reveal from '../components/Reveal.jsx';
-import CountUp from '../components/rb/CountUp.jsx';
 import ScrollVelocity from '../components/rb/ScrollVelocity.jsx';
 import Magnet from '../components/rb/Magnet.jsx';
+import DotGrid from '../components/rb/DotGrid.jsx';
+import RotatingText from '../components/rb/RotatingText.jsx';
+import CircularText from '../components/rb/CircularText.jsx';
+import BlurText from '../components/rb/BlurText.jsx';
+import ShinyText from '../components/rb/ShinyText.jsx';
+import GlareHover from '../components/rb/GlareHover.jsx';
+import Stack from '../components/rb/Stack.jsx';
+import Counter from '../components/rb/Counter.jsx';
+import GradientText from '../components/rb/GradientText.jsx';
+import MagnetLines from '../components/rb/MagnetLines.jsx';
+import { useInView } from 'motion/react';
 import { events, fmtDate } from '../data/events.js';
 import { go } from '../App.jsx';
 
@@ -22,6 +32,7 @@ export default function Landing({ user }) {
       <Marquee />
       <Departures />
       <Route />
+      <Tracks />
       <Stamps />
       <Numbers />
       <TearCta />
@@ -50,8 +61,11 @@ function Hero() {
 
   return (
     <section className="hero wrap">
+      <div className="hero__dots" aria-hidden="true">
+        <DotGrid dotSize={3} gap={24} baseColor="#d6d6cf" activeColor="#7665ff" proximity={140} shockRadius={260} shockStrength={4} glow={0.2} />
+      </div>
       <div className="hero__meta label">
-        <span><i className="dot dot--live" /> Boarding now · ReBuild '26</span>
+        <span><i className="dot dot--live" /> <ShinyText text="Boarding now · ReBuild '26" color="#111111" shineColor="#7665ff" speed={2.4} /></span>
         <span>The digital home for student innovation</span>
         <span>Chennai · India</span>
       </div>
@@ -81,6 +95,11 @@ function Hero() {
                 <p className="label">Seat</p>
                 <p className="hero__class purple">CC-26</p>
               </div>
+              <div className="hero__seal" aria-hidden="true">
+                <CircularText text="BOARDING NOW ✦ REBUILD '26 ✦ " size={136} fontSize={12} fontWeight={700} spinDuration={16} color="#111111" onHover="speedUp">
+                  <span className="hero__seal-core">✦</span>
+                </CircularText>
+              </div>
               <Barcode value="ADMIT-ONE-BUILDER" height={56} />
               <Magnet padding={50} magnetStrength={5}>
                 <a className="btn btn--lime btn--block" href="#/register">Board now ↗</a>
@@ -105,6 +124,18 @@ function Hero() {
           <p className="hero__copy">
             A digital arena for students who don't just have ideas. They build them. Find a hackathon, team up and ship
             something real.
+          </p>
+
+          <p className="hero__for">
+            <span className="label">Built for</span>
+            <RotatingText
+              texts={['DESIGNERS', 'CODERS', 'FIRST-TIMERS', 'DREAMERS', 'TEAMS']}
+              mainClassName="hero__rot"
+              staggerFrom="last"
+              staggerDuration={0.025}
+              rotationInterval={2200}
+              transition={{ type: 'spring', damping: 30, stiffness: 400 }}
+            />
           </p>
 
           {/* boarding-pass route: IDEA → SHIPPED */}
@@ -236,6 +267,55 @@ function Route() {
   );
 }
 
+/* ---------------- TRACKS: a draggable deck of track passes ---------------- */
+const TRACK_CARDS = [
+  { t: 'AI', d: 'Models, agents and tools that think.', code: 'TRK-AI', tone: 'purple' },
+  { t: 'WEB', d: 'Sites and apps people actually use.', code: 'TRK-WEB', tone: 'ink' },
+  { t: 'DESIGN', d: 'Interfaces, systems and brands.', code: 'TRK-DSN', tone: 'lime' },
+  { t: 'SMART TECH', d: 'Hardware, IoT and the physical world.', code: 'TRK-IOT', tone: 'paper' },
+  { t: 'QUIZ', d: 'Fast rounds for sharp minds.', code: 'TRK-QZ', tone: 'purple' }
+];
+
+function Tracks() {
+  return (
+    <section className="section wrap" id="tracks">
+      <div className="tracks">
+        <div className="tracks__copy">
+          <SectionHead n="03" label="Choose a track" title="SHUFFLE THE DECK." />
+          <p className="tracks__lead">
+            Five tracks, one pass. Drag the top card away to see the next one. Every track has its own rounds, mentors and
+            prizes.
+          </p>
+          <ul className="tracks__list">
+            {TRACK_CARDS.map(c => (
+              <li key={c.t}><span className="mono purple">{c.code}</span> {c.t}</li>
+            ))}
+          </ul>
+        </div>
+        <Reveal className="tracks__stack">
+          <Stack
+            layout="fan"
+            visible={4}
+            radius={18}
+            sendToBackOnClick
+            autoplay
+            autoplayDelay={3400}
+            pauseOnHover
+            cards={TRACK_CARDS.map(c => (
+              <div key={c.t} className={`trackcard trackcard--${c.tone}`}>
+                <div className="trackcard__top label"><span>Track pass</span><span>{c.code}</span></div>
+                <p className="trackcard__title">{c.t}</p>
+                <p className="trackcard__desc">{c.d}</p>
+                <div className="trackcard__foot"><Barcode value={c.code} height={34} /></div>
+              </div>
+            ))}
+          />
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
 /* ---------------- 04 · STAMPS: the platform ---------------- */
 const FEATURES = [
   { k: 'IdeaCheck', s: 'SCREENED', d: 'AI screening tells you how original your idea is before you build.', tone: 'purple', r: -6 },
@@ -249,10 +329,11 @@ const FEATURES = [
 function Stamps() {
   return (
     <section className="section wrap" id="stamps">
-      <SectionHead n="03" label="The platform" title="ONE PASS. EVERY STAMP." />
+      <SectionHead n="04" label="The platform" title="ONE PASS. EVERY STAMP." />
       <div className="stamps">
         {FEATURES.map((f, i) => (
-          <Reveal key={f.k} delay={(i % 3) * 0.08} className="stamp-card">
+          <Reveal key={f.k} delay={(i % 3) * 0.08} className="stamp-cell">
+            <GlareHover className="stamp-card" background="#ffffff" borderColor="#deded8" borderRadius="0px" glareColor="#7665ff" glareOpacity={0.18} glareSize={260} transitionDuration={800}>
             <motion.div
               className={`stamp stamp--${f.tone}`}
               initial={{ scale: 1.6, opacity: 0, rotate: f.r - 12 }}
@@ -265,6 +346,7 @@ function Stamps() {
             </motion.div>
             <h3>{f.k}</h3>
             <p>{f.d}</p>
+            </GlareHover>
           </Reveal>
         ))}
       </div>
@@ -280,14 +362,15 @@ function Numbers() {
     { to: 64, s: '', l: 'Hackathons hosted' },
     { to: 3200, s: '+', l: 'Projects shipped' }
   ];
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: '-80px' });
   return (
     <section className="section wrap">
-      <div className="numbers">
+      <div className="numbers" ref={ref}>
         {stats.map(x => (
           <div key={x.l} className="numbers__item">
             <p className="numbers__value">
-              <CountUp to={x.to} separator="," duration={1.6} />
-              {x.s}
+              <Counter value={inView ? x.to : 0} fontSize="1em" fontWeight={800} duration={1.4} stagger={0.06} intro={false} suffix={x.s} />
             </p>
             <p className="label">{x.l}</p>
           </div>
@@ -311,8 +394,15 @@ function TearCta() {
       <Reveal>
         <div className={`cta ${torn ? 'is-torn' : ''}`}>
           <div className="cta__main">
+            <div className="cta__lines" aria-hidden="true">
+              <MagnetLines rows={7} columns={16} lineColor="rgba(255,255,255,0.14)" accentColor="#a8e62e" lineHeight={22} lineWidth={2} radius={220} />
+            </div>
             <p className="label">Ready?</p>
-            <h2>YOUR NEXT PROJECT STARTS HERE.</h2>
+            <h2>
+              <GradientText colors={['#ffffff', '#a8e62e', '#7665ff', '#ffffff']} animationSpeed={6} className="cta__grad">
+                YOUR NEXT PROJECT STARTS HERE.
+              </GradientText>
+            </h2>
             <p>Create your CampusCode pass in under a minute. Tear the stub to begin.</p>
           </div>
           <motion.button
@@ -338,7 +428,9 @@ export function SectionHead({ n, label, title }) {
       <p className="section-head__label label">
         <span className="purple">{n}</span> {label}
       </p>
-      <h2>{title}</h2>
+      <h2>
+        <BlurText text={title} animateBy="words" direction="top" delay={90} className="section-head__blur" />
+      </h2>
     </Reveal>
   );
 }
