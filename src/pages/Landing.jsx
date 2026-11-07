@@ -4,6 +4,7 @@ import Nav from '../components/Nav.jsx';
 import Footer from '../components/Footer.jsx';
 import Ticket from '../components/Ticket.jsx';
 import Barcode from '../components/Barcode.jsx';
+import Truck from '../components/Truck.jsx';
 import FlapText from '../components/FlapText.jsx';
 import Reveal from '../components/Reveal.jsx';
 import ScrollVelocity from '../components/rb/ScrollVelocity.jsx';
@@ -134,6 +135,7 @@ function Hero() {
               staggerFrom="last"
               staggerDuration={0.025}
               rotationInterval={2200}
+              animatePresenceMode="popLayout"
               transition={{ type: 'spring', damping: 30, stiffness: 400 }}
             />
           </p>
@@ -145,7 +147,8 @@ function Hero() {
               <p className="route-line__code">IDEA</p>
             </div>
             <div className="route-line__path" aria-hidden="true">
-              <span className="route-line__plane">✦</span>
+              <span className="route-line__trail" />
+              <Truck />
             </div>
             <div className="route-line__to">
               <p className="label">To</p>
@@ -318,39 +321,98 @@ function Tracks() {
 
 /* ---------------- 04 · STAMPS: the platform ---------------- */
 const FEATURES = [
-  { k: 'IdeaCheck', s: 'SCREENED', d: 'AI screening tells you how original your idea is before you build.', tone: 'purple', r: -6 },
-  { k: 'HackMate', s: 'MATCHED', d: 'Find teammates by skill or search by CampusCode ID.', tone: 'ink', r: 4 },
-  { k: 'RuleBot', s: 'CLEARED', d: 'Ask the rules anything. Get answers instantly, not after the deadline.', tone: 'lime', r: -3 },
-  { k: 'Live rounds', s: 'TRACKED', d: 'Every round, result and shortlist in one place.', tone: 'ink', r: 5 },
-  { k: 'Certificates', s: 'VERIFIED', d: 'Verifiable certificates, issued the day results land.', tone: 'purple', r: -5 },
-  { k: 'Digital ID', s: 'ISSUED', d: 'Your builder ID card with a QR code, ready at every event.', tone: 'lime', r: 3 }
+  { k: 'IdeaCheck', code: 'IDC-01', s: 'SCREENED', d: 'AI screening tells you how original your idea is before you build.', tone: 'purple', r: -6 },
+  { k: 'HackMate', code: 'HKM-02', s: 'MATCHED', d: 'Find teammates by skill or search by CampusCode ID.', tone: 'ink', r: 4 },
+  { k: 'RuleBot', code: 'RBT-03', s: 'CLEARED', d: 'Ask the rules anything. Get answers instantly, not after the deadline.', tone: 'lime', r: -3 },
+  { k: 'Live rounds', code: 'LVR-04', s: 'TRACKED', d: 'Every round, result and shortlist in one place.', tone: 'ink', r: 5 },
+  { k: 'Certificates', code: 'CRT-05', s: 'VERIFIED', d: 'Verifiable certificates, issued the day results land.', tone: 'purple', r: -5 },
+  { k: 'Digital ID', code: 'DID-06', s: 'ISSUED', d: 'Your builder ID card with a QR code, ready at every event.', tone: 'lime', r: 3 }
 ];
 
 function Stamps() {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: '-120px' });
   return (
     <section className="section wrap" id="stamps">
       <SectionHead n="04" label="The platform" title="ONE PASS. EVERY STAMP." />
+      <div className="passport-bar" ref={ref}>
+        <p className="passport-bar__copy">
+          Your CampusCode pass is a passport. Every tool you use leaves a stamp. Hover a page to stamp it again.
+        </p>
+        <div className="passport-bar__meter">
+          <div className="passport-bar__row">
+            <span className="label">Stamps collected</span>
+            <span className="passport-bar__count">
+              <Counter value={inView ? FEATURES.length : 0} fontSize="1em" fontWeight={900} duration={1.2} intro={false} />
+              <span className="muted">/{FEATURES.length}</span>
+            </span>
+          </div>
+          <div className="passport-bar__track">
+            <motion.span
+              className="passport-bar__fill"
+              initial={{ width: 0 }}
+              animate={{ width: inView ? '100%' : 0 }}
+              transition={{ duration: 1.6, ease: EASE, delay: 0.2 }}
+            />
+          </div>
+        </div>
+      </div>
       <div className="stamps">
         {FEATURES.map((f, i) => (
-          <Reveal key={f.k} delay={(i % 3) * 0.08} className="stamp-cell">
-            <GlareHover className="stamp-card" background="#ffffff" borderColor="#deded8" borderRadius="0px" glareColor="#7665ff" glareOpacity={0.18} glareSize={260} transitionDuration={800}>
-            <motion.div
-              className={`stamp stamp--${f.tone}`}
-              initial={{ scale: 1.6, opacity: 0, rotate: f.r - 12 }}
-              whileInView={{ scale: 1, opacity: 1, rotate: f.r }}
-              viewport={{ once: true, margin: '-60px' }}
-              transition={{ type: 'spring', stiffness: 260, damping: 16, delay: 0.15 + (i % 3) * 0.1 }}
-            >
-              <span>{f.s}</span>
-              <small>CAMPUSCODE · 26</small>
-            </motion.div>
-            <h3>{f.k}</h3>
-            <p>{f.d}</p>
-            </GlareHover>
-          </Reveal>
+          <StampCard key={f.k} f={f} i={i} />
         ))}
       </div>
     </section>
+  );
+}
+
+function StampCard({ f, i }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: '-60px' });
+  const [hit, setHit] = useState(0);
+  const shown = inView ? hit + 1 : 0;
+  return (
+    <Reveal delay={(i % 3) * 0.08} className="stamp-cell">
+      <GlareHover className="stamp-card" background="#ffffff" borderColor="#deded8" borderRadius="0px" glareColor="#7665ff" glareOpacity={0.16} glareSize={260} transitionDuration={800}>
+        <div className="visa" ref={ref} onMouseEnter={() => inView && setHit(h => h + 1)}>
+          <div className="visa__top label">
+            <span>Visa · {String(i + 1).padStart(2, '0')}</span>
+            <span>{f.code}</span>
+          </div>
+          <div className={`visa__zone visa__zone--${f.tone}`}>
+            <span className="visa__hint label">Stamp zone</span>
+            {shown > 0 && (
+              <>
+                <motion.span
+                  key={'ink' + shown}
+                  className={`visa__ink visa__ink--${f.tone}`}
+                  initial={{ scale: 0.5, opacity: 0.55 }}
+                  animate={{ scale: 1.9, opacity: 0 }}
+                  transition={{ duration: 0.7, ease: 'easeOut', delay: shown === 1 ? 0.15 + (i % 3) * 0.1 : 0.05 }}
+                />
+                <motion.div
+                  key={'stamp' + shown}
+                  className={`stamp stamp--${f.tone}`}
+                  initial={{ scale: 1.7, opacity: 0, rotate: f.r - 14, y: -10 }}
+                  animate={{ scale: 1, opacity: 1, rotate: f.r, y: 0 }}
+                  transition={{ type: 'spring', stiffness: 320, damping: 15, delay: shown === 1 ? 0.15 + (i % 3) * 0.1 : 0 }}
+                >
+                  <span>{f.s}</span>
+                  <small>CAMPUSCODE · 26</small>
+                </motion.div>
+              </>
+            )}
+            <span className="visa__date mono">07.11.26</span>
+          </div>
+          <h3>{f.k}</h3>
+          <p>{f.d}</p>
+          <div className="visa__foot label">
+            <span>Valid · all events</span>
+            <span className="visa__arrow">↗</span>
+          </div>
+        </div>
+      </GlareHover>
+    </Reveal>
   );
 }
 
